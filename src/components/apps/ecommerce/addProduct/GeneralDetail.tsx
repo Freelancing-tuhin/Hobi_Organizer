@@ -1,6 +1,7 @@
-import { Label, TextInput, Textarea } from 'flowbite-react';
+import { Label, TextInput } from 'flowbite-react';
 import { Icon } from '@iconify/react';
 import CardBox from 'src/components/shared/CardBox';
+import CustomTextEditor from './CustomTextEditor';
 
 interface GeneralDetailProps {
   title: string;
@@ -50,23 +51,17 @@ const GeneralDetail: React.FC<GeneralDetailProps> = ({ title, description, handl
         <Label className="font-medium text-sm text-gray-700 dark:text-gray-300 mb-2 block">
           Description
         </Label>
-        <div className="relative">
-          <Textarea
-            id="event-description"
-            name="description"
-            value={description}
-            onChange={handleChange}
-            rows={4}
-            className="form-control resize-none"
-            placeholder="Tell people what your event is about..."
-          />
-        </div>
+        <CustomTextEditor
+          value={description}
+          onChange={(content) => handleChange({ target: { name: 'description', value: content } } as any)}
+          placeholder="Tell people what your event is about..."
+        />
         <div className="flex items-center justify-between mt-2">
           <p className="text-xs text-gray-500 dark:text-gray-400">
             A good description helps attendees understand your event
           </p>
           <span className="text-xs text-gray-400">
-            {description.length}/500
+            {description.replace(/<[^>]*>/g, '').length}/500
           </span>
         </div>
       </div>

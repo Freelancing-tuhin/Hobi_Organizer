@@ -1,13 +1,10 @@
-
-import "react-quill/dist/quill.snow.css";
 import { Label, TextInput } from "flowbite-react";
 import CardBox from "src/components/shared/CardBox";
-import TiptapEdit from "src/views/forms/from-tiptap/TiptapEdit";
-
-
+import CustomTextEditor from "../addProduct/CustomTextEditor";
+import { useState } from "react";
 
 const GeneralDetail = () => {
-
+  const [description, setDescription] = useState("Super Games is a high-octane event...");
 
   return (
     <>
@@ -34,7 +31,10 @@ const GeneralDetail = () => {
           <div className="mb-2 block">
             <Label htmlFor="desc" value="Description" />
           </div>
-          <TiptapEdit/>
+          <CustomTextEditor
+            value={description}
+            onChange={(content) => setDescription(content)}
+          />
           <small className="text-xs text-darklink dark:text-bodytext">
             Set a description to the product for better visibility.
           </small>

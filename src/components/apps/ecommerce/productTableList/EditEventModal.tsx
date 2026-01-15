@@ -2,6 +2,7 @@ import { Icon } from '@iconify/react/dist/iconify.js';
 import { Modal, Button, TextInput, Label, Checkbox } from 'flowbite-react';
 import { useEffect, useState } from 'react';
 import { editEvent } from 'src/service/editEvent';
+import CustomTextEditor from '../addProduct/CustomTextEditor';
 
 const EditEventModal = ({ open, onClose, eventData, getEvents }: any) => {
   const [editedEvent, setEditedEvent] = useState(eventData);
@@ -9,7 +10,7 @@ const EditEventModal = ({ open, onClose, eventData, getEvents }: any) => {
 
   const handleChange = (e: any) => {
     const { name, value, type, checked } = e.target;
-    setEditedEvent({ ...editedEvent, [name]: type === 'checkbox' ? checked : value });
+    setEditedEvent((prev: any) => ({ ...prev, [name]: type === 'checkbox' ? checked : value }));
   };
 
   const handleInputChange = (index: number, field: string, value: string) => {
@@ -42,7 +43,7 @@ const EditEventModal = ({ open, onClose, eventData, getEvents }: any) => {
       await editEvent(eventId, updatedData);
       getEvents();
       onClose();
-    } catch (error) {}
+    } catch (error) { }
   };
 
   useEffect(() => {
@@ -82,15 +83,11 @@ const EditEventModal = ({ open, onClose, eventData, getEvents }: any) => {
               />
             </div>
             <div className="col-span-2">
-              <Label htmlFor="description" value="Description" />
-              <textarea
-                id="description"
-                name="description"
+              <Label htmlFor="description" value="Description" className="mb-2 block" />
+              <CustomTextEditor
                 value={editedEvent?.description || ''}
-                onChange={handleChange}
-                rows={4} // Adjust the number of rows as needed
+                onChange={(content) => setEditedEvent((prev: any) => ({ ...prev, description: content }))}
                 placeholder="Enter event description..."
-                className="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
               />
             </div>
             {/* <div>

@@ -66,7 +66,8 @@ const AddProduct = () => {
   const [isLoading, setIsLoading] = useState(false);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    setEventData({ ...eventData, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    setEventData((prev) => ({ ...prev, [name]: value }));
     // Clear error when user starts typing
     if (stepErrors[currentStep]) {
       setStepErrors((prev) => ({ ...prev, [currentStep]: '' }));

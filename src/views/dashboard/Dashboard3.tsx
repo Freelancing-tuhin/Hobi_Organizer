@@ -4,7 +4,7 @@ import RevenueByProduct from 'src/components/dashboards/Dashboard1/RevenueByProd
 import Reviews from 'src/components/dashboards/Dashboard1/Reviews';
 // import SalesOverview from 'src/components/dashboards/Dashboard1/SalesOverview';
 import YourPerformance from 'src/components/dashboards/Dashboard1/YourPerformance';
-import ColorBoxes from 'src/components/dashboards/dashboard3/ColorBoxes';
+import StatCards from 'src/components/dashboards/dashboard3/StatCards';
 import BreadcrumbComp from 'src/layouts/full/shared/breadcrumb/BreadcrumbComp';
 import { getEventReview } from 'src/service/eventReview';
 import getBookingStatistics, {
@@ -114,9 +114,10 @@ const Dashboard3 = () => {
       <LockScreen />
       <BreadcrumbComp title={`Event: ${stats?.eventDetails?.title}`} items={BCrumb} />
       <div className="grid grid-cols-12 gap-30">
-        <div className="col-span-12">
-          <ColorBoxes stats={stats} />
-        </div>
+
+        {/* Stat Cards */}
+        <StatCards usersList={usersList} />
+
         <div className="lg:col-span-12 col-span-12">
           <RevenueByProduct usersList={usersList} fetchUsers={fetchUsers} />
         </div>
