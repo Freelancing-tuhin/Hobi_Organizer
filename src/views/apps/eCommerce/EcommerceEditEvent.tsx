@@ -101,7 +101,14 @@ const EditEvent = () => {
                         },
                         description: event.description || '',
                         isTicketed: event.isTicketed ?? true,
-                        tickets: event.tickets || [],
+                        tickets: (event.tickets || []).map((t: any) => {
+                            const isUserGST = !!user?.GST;
+                            return {
+                                ...t,
+                                gst_amount: t.gst_amount ?? (isUserGST && t.ticketPrice ? (parseFloat(t.ticketPrice) / 1.18 * 0.18) : 0),
+                                enteredPrice: t.enteredPrice ?? (isUserGST && t.ticketPrice ? (parseFloat(t.ticketPrice) / 1.18).toFixed(2) : t.ticketPrice || ''),
+                            };
+                        }),
                         inclusions: event.inclusions || [],
                         exclusions: event.exclusions || [],
                         organizerId: event.organizerId?._id || user?._id,

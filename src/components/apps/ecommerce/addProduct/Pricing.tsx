@@ -1,22 +1,48 @@
-import { Label, Radio, TextInput, Button } from 'flowbite-react';
+import { useContext } from 'react';
+import { Label, Radio, TextInput, Button, Alert } from 'flowbite-react';
 import { Icon } from '@iconify/react';
 import CardBox from 'src/components/shared/CardBox';
+import { AuthContext } from 'src/context/authContext/AuthContext';
 
 const Pricing = ({ eventData, setEventData }: any) => {
+  const authContext = useContext(AuthContext);
+  const user = authContext?.user;
+  const hasGST = !!user?.GST;
   const handleRadioChange = (event: any) => {
     setEventData({ ...eventData, isTicketed: event.target.value === 'ticketed', tickets: [] });
   };
 
-  const handleInputChange = (index: any, field: any, value: any) => {
-    const updatedTickets = [...eventData.tickets];
-    updatedTickets[index][field] = value;
+  const handleInputChange = (index: number, field: string, value: any) => {
+    const updatedTickets = eventData.tickets.map((ticket: any, i: number) => {
+      if (i !== index) return ticket;
+
+      const newTicket = { ...ticket, [field]: value };
+
+      if (field === 'ticketPrice') {
+        newTicket.enteredPrice = value;
+        const basePrice = parseFloat(value) || 0;
+
+        if (user?.GST) {
+          console.log("===>", user?.GST)
+          const gstAmt = basePrice * 0.18;
+          newTicket.gst_amount = gstAmt;
+          newTicket.ticketPrice = (basePrice + gstAmt).toFixed(2);
+        } else {
+          console.log("===>user not gst", user?.GST)
+          newTicket.ticketPrice = value;
+          newTicket.gst_amount = 0;
+        }
+      }
+      return newTicket;
+    });
+
     setEventData({ ...eventData, tickets: updatedTickets });
   };
 
   const addTicket = () => {
     setEventData({
       ...eventData,
-      tickets: [...eventData.tickets, { ticketName: '', ticketPrice: '', quantity: '' }],
+      tickets: [...eventData.tickets, { ticketName: '', ticketPrice: '', enteredPrice: '', gst_amount: 0, quantity: '' }],
     });
   };
 
@@ -138,6 +164,16 @@ const Pricing = ({ eventData, setEventData }: any) => {
               Add
             </Button>
           </div>
+          {hasGST && (
+            <Alert color="info" className="mb-4 rounded-xl border border-blue-100 dark:border-blue-900/30 bg-blue-50/50 dark:bg-blue-900/10">
+              <div className="flex items-start gap-3">
+                <Icon icon="tabler:info-circle" className="w-5 h-5 text-blue-600 dark:text-blue-400 mt-0.5" />
+                <p className="text-xs text-blue-700 dark:text-blue-300 leading-relaxed">
+                  If you have a GST registered so please enter the ticket amount without GST.
+                </p>
+              </div>
+            </Alert>
+          )}
 
           {/* Tickets List */}
           {eventData.tickets.length === 0 ? (
@@ -191,12 +227,17 @@ const Pricing = ({ eventData, setEventData }: any) => {
                       <Label className="text-xs text-gray-500 mb-1 block">Price (₹)</Label>
                       <TextInput
                         type="number"
-                        value={ticket.ticketPrice}
+                        value={ticket.enteredPrice ?? ticket.ticketPrice}
                         onChange={(e) => handleInputChange(index, 'ticketPrice', e.target.value)}
                         placeholder="500"
                         sizing="sm"
                         className="form-control"
                       />
+                      {hasGST && ticket.enteredPrice && (
+                        <p className="text-[10px] text-primary mt-1 font-medium">
+                          Total: ₹{ticket.ticketPrice} (inc. 18% GST)
+                        </p>
+                      )}
                     </div>
                     <div>
                       <Label className="text-xs text-gray-500 mb-1 block">Qty</Label>
