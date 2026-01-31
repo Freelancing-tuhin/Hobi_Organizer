@@ -1,11 +1,43 @@
 import { Icon } from '@iconify/react';
 import { format } from 'date-fns';
-import { Table, Pagination, Spinner } from 'flowbite-react';
+import { Table, Pagination, Spinner, Modal, Button } from 'flowbite-react';
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router';
+import { deleteEvent } from 'src/service/deleteEvent';
 
 const EventTable = ({ events, totalPages, getEvents, searchText, loading }: any) => {
   const [currentPage, setCurrentPage] = useState(1);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [eventToDelete, setEventToDelete] = useState<any>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  const handleDeleteClick = (event: any) => {
+    setEventToDelete(event);
+    setShowDeleteModal(true);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!eventToDelete) return;
+
+    setIsDeleting(true);
+    try {
+      await deleteEvent(eventToDelete._id);
+      setShowDeleteModal(false);
+      setEventToDelete(null);
+      // Refresh the events list
+      getEvents(currentPage);
+      window.location.reload();
+    } catch (error) {
+      console.error('Failed to delete event:', error);
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
+  const handleCancelDelete = () => {
+    setShowDeleteModal(false);
+    setEventToDelete(null);
+  };
 
   const formatTime = (timeString: string) => {
     if (!timeString) return '';
@@ -172,6 +204,13 @@ const EventTable = ({ events, totalPages, getEvents, searchText, loading }: any)
                         Edit
                       </button>
                     </Link>
+                    <button
+                      onClick={() => handleDeleteClick(item)}
+                      className="px-4 py-3 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-lg font-medium text-xs hover:shadow-lg hover:shadow-red-500/30 transition-all flex items-center gap-1.5"
+                    >
+                      <Icon icon="solar:trash-bin-trash-bold" height={16} />
+                      Delete
+                    </button>
                   </div>
                 </Table.Cell>
               </Table.Row>
@@ -194,6 +233,62 @@ const EventTable = ({ events, totalPages, getEvents, searchText, loading }: any)
           />
         </div>
       )}
+
+      {/* Delete Confirmation Modal */}
+      <Modal
+        show={showDeleteModal}
+        size="md"
+        onClose={handleCancelDelete}
+        popup
+        className="rounded-xl"
+      >
+        <Modal.Header />
+        <Modal.Body>
+          <div className="text-center">
+            <div className="mx-auto mb-4 w-16 h-16 bg-red-100 dark:bg-red-900/30 rounded-full flex items-center justify-center">
+              <Icon
+                icon="solar:trash-bin-trash-bold"
+                className="text-red-500 dark:text-red-400"
+                height={32}
+              />
+            </div>
+            <h3 className="mb-2 text-lg font-semibold text-gray-800 dark:text-white">
+              Delete Event
+            </h3>
+            <p className="mb-5 text-sm text-gray-500 dark:text-gray-400">
+              Are you sure you want to delete <span className="font-semibold text-gray-700 dark:text-gray-300">"{eventToDelete?.title}"</span>? This action cannot be undone.
+            </p>
+            <div className="flex justify-center gap-3">
+              <Button
+                color="gray"
+                onClick={handleCancelDelete}
+                disabled={isDeleting}
+                className="px-6"
+              >
+                Cancel
+              </Button>
+              <Button
+                color="failure"
+                onClick={handleConfirmDelete}
+                disabled={isDeleting}
+                className="px-6"
+              >
+                {isDeleting ? (
+                  <>
+                    <Spinner size="sm" className="mr-2" />
+                    Deleting...
+                  </>
+                ) : (
+                  <>
+                    <Icon icon="solar:trash-bin-trash-bold" height={16} className="mr-2" />
+                    Delete
+                  </>
+                )}
+              </Button>
+            </div>
+          </div>
+        </Modal.Body>
+      </Modal>
     </>
   );
 };
