@@ -61,7 +61,7 @@ const GeneralDetail: React.FC<GeneralDetailProps> = ({ title, description, handl
             A good description helps attendees understand your event
           </p>
           <span className="text-xs text-gray-400">
-            {description.replace(/<[^>]*>/g, '').length}/500
+            {description.replace(/<[^>]*>/g, '').length}
           </span>
         </div>
       </div>

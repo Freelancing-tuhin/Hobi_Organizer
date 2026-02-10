@@ -43,7 +43,7 @@ const SupportingImages = ({ supportingImages, setSupportingImages }: SupportingI
                 folder: 'campus_highlights',
                 cropping: false,
                 multiple: true,
-                maxFileSize: 1500000,
+                maxFileSize: 15000000,
                 maxFiles: 10,
                 resourceType: 'image',
                 clientAllowedFormats: ['png', 'jpg', 'jpeg', 'gif', 'webp'],
@@ -110,7 +110,7 @@ const SupportingImages = ({ supportingImages, setSupportingImages }: SupportingI
                             Click to upload supporting images
                         </p>
                         <p className="text-xs text-gray-400 mt-1">
-                            PNG, JPG, JPEG up to 1.5MB each (Max 10 images)
+                            PNG, JPG, JPEG up to 15MB each (Max 10 images)
                         </p>
                     </div>
                 </button>
