@@ -13,6 +13,19 @@ export interface CreateEventPayload {
   eventDates: string[];  // Array of dates
   startTime: string;
   endTime: string;
+  routine?: {
+    mode?: 'Weekly' | 'Custom';
+    startDate?: string;
+    endDate?: string;
+    sessionsPerMonth?: number;
+    daysOfWeek?: number[];
+    customDates?: string[];
+  };
+  subscriptionPricing?: {
+    billingCycle?: 'Weekly' | 'Monthly';
+    price?: string;
+  };
+  subscriptionCapacity?: number;
   location: {
     address: string;
     latitude: number;
@@ -52,6 +65,18 @@ export const createEvent = async (eventData: CreateEventPayload): Promise<void> 
 
     if (eventData.isTicketed && eventData.tickets) {
       formData.append('tickets', JSON.stringify(eventData.tickets));
+    }
+
+    if (eventData.routine) {
+      formData.append('routine', JSON.stringify(eventData.routine));
+    }
+
+    if (eventData.subscriptionPricing) {
+      formData.append('subscriptionPricing', JSON.stringify(eventData.subscriptionPricing));
+    }
+
+    if (typeof eventData.subscriptionCapacity === 'number') {
+      formData.append('subscriptionCapacity', String(eventData.subscriptionCapacity));
     }
 
     // Send supporting images as JSON array of URLs

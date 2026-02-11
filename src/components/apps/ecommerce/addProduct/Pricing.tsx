@@ -8,6 +8,7 @@ const Pricing = ({ eventData, setEventData }: any) => {
   const authContext = useContext(AuthContext);
   const user = authContext?.user;
   const hasGST = !!user?.GST;
+  const isRoutine = eventData.type === 'Routine';
   const handleRadioChange = (event: any) => {
     setEventData({ ...eventData, isTicketed: event.target.value === 'ticketed', tickets: [] });
   };
@@ -51,8 +52,38 @@ const Pricing = ({ eventData, setEventData }: any) => {
     setEventData({ ...eventData, tickets: updatedTickets });
   };
 
+  const updateSubscriptionTicket = (billingCycle: string, price: string, capacity: number) => {
+    const basePrice = parseFloat(price) || 0;
+    let gstAmt = 0;
+    let finalPrice = basePrice;
+
+    if (user?.GST) {
+      gstAmt = basePrice * 0.18;
+      finalPrice = basePrice + gstAmt;
+    }
+
+    const ticket = {
+      ticketName: `${billingCycle} Subscription`,
+      ticketPrice: Number(finalPrice.toFixed(2)),
+      enteredPrice: price,
+      gst_amount: Number(gstAmt.toFixed(2)),
+      quantity: capacity || 0
+    };
+
+    setEventData({
+      ...eventData,
+      isTicketed: true,
+      tickets: [ticket],
+      subscriptionPricing: {
+        billingCycle,
+        price
+      },
+      subscriptionCapacity: capacity
+    });
+  };
+
   return (
-    <div className={`grid gap-6 items-start ${eventData.isTicketed ? 'grid-cols-1 lg:grid-cols-2' : 'grid-cols-1'}`}>
+    <div className={`grid gap-6 items-start ${eventData.isTicketed && !isRoutine ? 'grid-cols-1 lg:grid-cols-2' : 'grid-cols-1'}`}>
       {/* Left Side - Activity Type Selection */}
       <CardBox>
         {/* Header */}
@@ -66,65 +97,143 @@ const Pricing = ({ eventData, setEventData }: any) => {
           </div>
         </div>
 
-        {/* Activity Type Selection */}
-        <Label className="font-medium text-sm text-gray-700 dark:text-gray-300 mb-3 block">
-          Activity Type
-        </Label>
-        <div className="space-y-3">
-          <label
-            htmlFor="free-activity"
-            className={`relative flex items-center gap-3 p-4 rounded-xl border-2 cursor-pointer transition-all duration-200 ${!eventData.isTicketed
-              ? 'border-primary bg-primary/5'
-              : 'border-gray-200 dark:border-gray-700 hover:border-primary/50'
-              }`}
-          >
-            <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${!eventData.isTicketed ? 'bg-primary text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-500'}`}>
-              <Icon icon="tabler:gift" className="w-5 h-5" />
-            </div>
-            <div className="flex-1">
-              <span className="font-semibold text-sm text-dark dark:text-white">Free Activity</span>
-              <p className="text-xs text-gray-500">No ticket required</p>
-            </div>
-            <Radio
-              id="free-activity"
-              name="isTicketed"
-              value="free"
-              checked={!eventData.isTicketed}
-              onChange={handleRadioChange}
-              className="sr-only"
-            />
-            {!eventData.isTicketed && (
-              <Icon icon="tabler:circle-check-filled" className="w-5 h-5 text-primary" />
-            )}
-          </label>
+        {!isRoutine && (
+          <>
+            {/* Activity Type Selection */}
+            <Label className="font-medium text-sm text-gray-700 dark:text-gray-300 mb-3 block">
+              Activity Type
+            </Label>
+            <div className="space-y-3">
+              <label
+                htmlFor="free-activity"
+                className={`relative flex items-center gap-3 p-4 rounded-xl border-2 cursor-pointer transition-all duration-200 ${!eventData.isTicketed
+                  ? 'border-primary bg-primary/5'
+                  : 'border-gray-200 dark:border-gray-700 hover:border-primary/50'
+                  }`}
+              >
+                <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${!eventData.isTicketed ? 'bg-primary text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-500'}`}>
+                  <Icon icon="tabler:gift" className="w-5 h-5" />
+                </div>
+                <div className="flex-1">
+                  <span className="font-semibold text-sm text-dark dark:text-white">Free Activity</span>
+                  <p className="text-xs text-gray-500">No ticket required</p>
+                </div>
+                <Radio
+                  id="free-activity"
+                  name="isTicketed"
+                  value="free"
+                  checked={!eventData.isTicketed}
+                  onChange={handleRadioChange}
+                  className="sr-only"
+                />
+                {!eventData.isTicketed && (
+                  <Icon icon="tabler:circle-check-filled" className="w-5 h-5 text-primary" />
+                )}
+              </label>
 
-          <label
-            htmlFor="ticketed-activity"
-            className={`relative flex items-center gap-3 p-4 rounded-xl border-2 cursor-pointer transition-all duration-200 ${eventData.isTicketed
-              ? 'border-primary bg-primary/5'
-              : 'border-gray-200 dark:border-gray-700 hover:border-primary/50'
-              }`}
-          >
-            <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${eventData.isTicketed ? 'bg-primary text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-500'}`}>
-              <Icon icon="tabler:ticket" className="w-5 h-5" />
+              <label
+                htmlFor="ticketed-activity"
+                className={`relative flex items-center gap-3 p-4 rounded-xl border-2 cursor-pointer transition-all duration-200 ${eventData.isTicketed
+                  ? 'border-primary bg-primary/5'
+                  : 'border-gray-200 dark:border-gray-700 hover:border-primary/50'
+                  }`}
+              >
+                <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${eventData.isTicketed ? 'bg-primary text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-500'}`}>
+                  <Icon icon="tabler:ticket" className="w-5 h-5" />
+                </div>
+                <div className="flex-1">
+                  <span className="font-semibold text-sm text-dark dark:text-white">Ticketed Activity</span>
+                  <p className="text-xs text-gray-500">Sell tickets</p>
+                </div>
+                <Radio
+                  id="ticketed-activity"
+                  name="isTicketed"
+                  value="ticketed"
+                  checked={eventData.isTicketed}
+                  onChange={handleRadioChange}
+                  className="sr-only"
+                />
+                {eventData.isTicketed && (
+                  <Icon icon="tabler:circle-check-filled" className="w-5 h-5 text-primary" />
+                )}
+              </label>
             </div>
-            <div className="flex-1">
-              <span className="font-semibold text-sm text-dark dark:text-white">Ticketed Activity</span>
-              <p className="text-xs text-gray-500">Sell tickets</p>
+          </>
+        )}
+
+        {isRoutine && (
+          <div className="space-y-4">
+            <div className="p-4 rounded-xl border border-primary/30 bg-primary/5">
+              <div className="flex items-center gap-2 text-sm text-primary">
+                <Icon icon="tabler:info-circle" className="w-4 h-4" />
+                <span>Routine subscriptions are always ticketed.</span>
+              </div>
             </div>
-            <Radio
-              id="ticketed-activity"
-              name="isTicketed"
-              value="ticketed"
-              checked={eventData.isTicketed}
-              onChange={handleRadioChange}
-              className="sr-only"
-            />
-            {eventData.isTicketed && (
-              <Icon icon="tabler:circle-check-filled" className="w-5 h-5 text-primary" />
+
+            {hasGST && (
+              <Alert color="info" className="rounded-xl border border-blue-100 dark:border-blue-900/30 bg-blue-50/50 dark:bg-blue-900/10">
+                <div className="flex items-start gap-3">
+                  <Icon icon="tabler:info-circle" className="w-5 h-5 text-blue-600 dark:text-blue-400 mt-0.5" />
+                  <p className="text-xs text-blue-700 dark:text-blue-300 leading-relaxed">
+                    If you have a GST registered so please enter the ticket amount without GST.
+                  </p>
+                </div>
+              </Alert>
             )}
-          </label>
-        </div>
+
+            <div>
+              <Label className="font-medium text-sm text-gray-700 dark:text-gray-300 mb-2 block">
+                Billing Cycle
+              </Label>
+              <div className="flex items-center gap-2">
+                {['Weekly', 'Monthly'].map((cycle) => (
+                  <button
+                    key={cycle}
+                    type="button"
+                    onClick={() => updateSubscriptionTicket(cycle, eventData.subscriptionPricing?.price || '', eventData.subscriptionCapacity || 0)}
+                    className={`px-4 py-2 rounded-xl text-sm font-semibold border ${eventData.subscriptionPricing?.billingCycle === cycle
+                      ? 'bg-primary text-white border-primary'
+                      : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 border-gray-200 dark:border-gray-700'
+                      }`}
+                  >
+                    {cycle}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div>
+              <Label className="font-medium text-sm text-gray-700 dark:text-gray-300 mb-2 block">
+                Subscription Price
+              </Label>
+              <TextInput
+                type="number"
+                min={0}
+                value={eventData.subscriptionPricing?.price || ''}
+                onChange={(e) => updateSubscriptionTicket(eventData.subscriptionPricing?.billingCycle || 'Monthly', e.target.value, eventData.subscriptionCapacity || 0)}
+                placeholder="Enter price"
+              />
+              {hasGST && eventData.subscriptionPricing?.price && (
+                <p className="mt-2 text-xs text-blue-700 dark:text-blue-300">
+                  GST 18%: ₹{(Number(eventData.subscriptionPricing.price || 0) * 0.18).toFixed(2)} | Total: ₹{(Number(eventData.subscriptionPricing.price || 0) * 1.18).toFixed(2)}
+                </p>
+              )}
+            </div>
+
+            <div>
+              <Label className="font-medium text-sm text-gray-700 dark:text-gray-300 mb-2 block">
+                Capacity (per session)
+              </Label>
+              <TextInput
+                type="number"
+                min={1}
+                value={eventData.subscriptionCapacity || ''}
+                onChange={(e) => updateSubscriptionTicket(eventData.subscriptionPricing?.billingCycle || 'Monthly', eventData.subscriptionPricing?.price || '', Number(e.target.value))}
+                placeholder="Enter capacity"
+              />
+            </div>
+          </div>
+        )}
 
         {/* Free Activity Message */}
         {!eventData.isTicketed && (
@@ -141,7 +250,7 @@ const Pricing = ({ eventData, setEventData }: any) => {
       </CardBox>
 
       {/* Right Side - Tickets (Only shown when ticketed) */}
-      {eventData.isTicketed && (
+      {eventData.isTicketed && !isRoutine && (
         <CardBox>
           {/* Tickets Header */}
           <div className="flex items-center justify-between mb-4">

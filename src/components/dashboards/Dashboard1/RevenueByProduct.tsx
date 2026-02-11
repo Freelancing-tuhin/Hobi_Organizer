@@ -11,6 +11,18 @@ const RevenueByProduct = ({ usersList, fetchUsers }: any) => {
   const [activeTab, setActiveTab] = useState('All');
   const [searchQuery, setSearchQuery] = useState('');
 
+  const getTicketLabel = (user: any) => {
+    if (user?.eventType === 'Routine') {
+      if (user?.subscriptionStartDate) {
+        const date = new Date(user.subscriptionStartDate);
+        const monthLabel = date.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+        return `Subscribed (${monthLabel})`;
+      }
+      return 'Subscribed';
+    }
+    return user?.ticketDetails?.ticketName || '';
+  };
+
   const handleTabClick = (tab: string) => {
     setActiveTab(tab);
   };
@@ -28,7 +40,7 @@ const RevenueByProduct = ({ usersList, fetchUsers }: any) => {
   const ticketTabs = useMemo(() => {
     const tabs = ['All'];
     if (usersList) {
-      const uniqueTickets = Array.from(new Set(usersList.map((user: any) => user.ticketDetails?.ticketName)));
+      const uniqueTickets = Array.from(new Set(usersList.map((user: any) => getTicketLabel(user))));
       tabs.push(...uniqueTickets.filter(Boolean) as string[]);
     }
     return tabs;
@@ -37,7 +49,7 @@ const RevenueByProduct = ({ usersList, fetchUsers }: any) => {
   const filteredUsers = useMemo(() => {
     if (!usersList) return [];
     return usersList.filter((user: any) => {
-      const matchesTab = activeTab === 'All' || user.ticketDetails?.ticketName === activeTab;
+      const matchesTab = activeTab === 'All' || getTicketLabel(user) === activeTab;
       const matchesSearch =
         user.userDetails?.full_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
         user.userDetails?.email?.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -139,7 +151,7 @@ const RevenueByProduct = ({ usersList, fetchUsers }: any) => {
                       <Table.Cell>
                         <div className="flex flex-col gap-1">
                           <Badge color="red" size="xs" className="w-fit">
-                            {user.ticketDetails?.ticketName}
+                            {getTicketLabel(user) || 'Ticket'}
                           </Badge>
                           <p className="text-xs text-gray-500">
                             Qty: {user.ticketsCount}

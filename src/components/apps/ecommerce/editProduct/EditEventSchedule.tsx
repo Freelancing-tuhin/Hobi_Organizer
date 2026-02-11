@@ -261,10 +261,18 @@ const EditEventSchedule = ({ eventData, setEventData }: any) => {
                         </div>
                         <div className="flex-1">
                             <span className="font-semibold text-dark dark:text-white">
-                                {eventData.type === 'Single' ? 'Single Activity' : 'Recurring Activity'}
+                                {eventData.type === 'Single'
+                                    ? 'Single Activity'
+                                    : eventData.type === 'Routine'
+                                        ? 'Routine Subscription'
+                                        : 'Recurring Activity'}
                             </span>
                             <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                                {eventData.type === 'Single' ? 'One-time event' : 'Repeats on multiple dates'}
+                                {eventData.type === 'Single'
+                                    ? 'One-time event'
+                                    : eventData.type === 'Routine'
+                                        ? 'Weekly classes with flexible dates'
+                                        : 'Repeats on multiple dates'}
                             </p>
                         </div>
                         <div className="px-3 py-1 bg-gray-100 dark:bg-gray-700 rounded-full">

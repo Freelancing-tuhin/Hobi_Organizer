@@ -47,6 +47,19 @@ const AddProduct = () => {
     eventDates: [] as string[],
     startTime: '',
     endTime: '',
+    routine: {
+      mode: 'Weekly',
+      startDate: '',
+      endDate: '',
+      sessionsPerMonth: 0,
+      daysOfWeek: [] as number[],
+      customDates: [] as string[],
+    },
+    subscriptionPricing: {
+      billingCycle: 'Monthly',
+      price: '',
+    },
+    subscriptionCapacity: 0,
     location: {
       address: '',
       latitude: 0,
@@ -99,7 +112,29 @@ const AddProduct = () => {
           setStepErrors({ ...stepErrors, 2: 'Please select activity type' });
           return false;
         }
-        if (!eventData.eventDates || eventData.eventDates.length === 0) {
+        if (eventData.type === 'Routine') {
+          const routine = eventData.routine || {};
+          if (routine.mode === 'Weekly') {
+            if (!routine.startDate) {
+              setStepErrors({ ...stepErrors, 2: 'Please select a start date' });
+              return false;
+            }
+            if (!routine.endDate) {
+              setStepErrors({ ...stepErrors, 2: 'Please select an end date' });
+              return false;
+            }
+            if (!routine.daysOfWeek || routine.daysOfWeek.length === 0) {
+              setStepErrors({ ...stepErrors, 2: 'Please select at least one weekday' });
+              return false;
+            }
+          }
+          if (routine.mode === 'Custom') {
+            if (!routine.customDates || routine.customDates.length === 0) {
+              setStepErrors({ ...stepErrors, 2: 'Please select at least one date' });
+              return false;
+            }
+          }
+        } else if (!eventData.eventDates || eventData.eventDates.length === 0) {
           setStepErrors({ ...stepErrors, 2: 'Please select at least one date' });
           return false;
         }
@@ -128,7 +163,16 @@ const AddProduct = () => {
         }
         return true;
       case 6:
-        if (eventData.isTicketed && eventData.tickets.length === 0) {
+        if (eventData.type === 'Routine') {
+          if (!eventData.subscriptionPricing?.price) {
+            setStepErrors({ ...stepErrors, 6: 'Please enter subscription price' });
+            return false;
+          }
+          if (!eventData.subscriptionCapacity || eventData.subscriptionCapacity < 1) {
+            setStepErrors({ ...stepErrors, 6: 'Please enter subscription capacity' });
+            return false;
+          }
+        } else if (eventData.isTicketed && eventData.tickets.length === 0) {
           setStepErrors({ ...stepErrors, 6: 'Please add at least one ticket' });
           return false;
         }
