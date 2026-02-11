@@ -67,16 +67,18 @@ export const createEvent = async (eventData: CreateEventPayload): Promise<void> 
       formData.append('tickets', JSON.stringify(eventData.tickets));
     }
 
-    if (eventData.routine) {
-      formData.append('routine', JSON.stringify(eventData.routine));
-    }
+    if (eventData.type === 'Routine') {
+      if (eventData.routine) {
+        formData.append('routine', JSON.stringify(eventData.routine));
+      }
 
-    if (eventData.subscriptionPricing) {
-      formData.append('subscriptionPricing', JSON.stringify(eventData.subscriptionPricing));
-    }
+      if (eventData.subscriptionPricing) {
+        formData.append('subscriptionPricing', JSON.stringify(eventData.subscriptionPricing));
+      }
 
-    if (typeof eventData.subscriptionCapacity === 'number') {
-      formData.append('subscriptionCapacity', String(eventData.subscriptionCapacity));
+      if (typeof eventData.subscriptionCapacity === 'number') {
+        formData.append('subscriptionCapacity', String(eventData.subscriptionCapacity));
+      }
     }
 
     // Send supporting images as JSON array of URLs
